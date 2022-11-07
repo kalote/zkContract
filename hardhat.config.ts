@@ -1,6 +1,7 @@
 import { config as LoadEnv } from "dotenv";
 require("@matterlabs/hardhat-zksync-deploy");
 require("@matterlabs/hardhat-zksync-solc");
+import "@nomicfoundation/hardhat-toolbox";
 
 LoadEnv();
 
@@ -26,5 +27,6 @@ module.exports = {
   },
   solidity: {
     version: "0.8.16",
+    paths: { tests: "tests" },
   },
 };
