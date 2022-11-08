@@ -20,7 +20,7 @@ describe("Twitt Main", () => {
 
     const erc20TokenFactory = await ethers.getContractFactory("ZkTwitt");
     erc20Token = await erc20TokenFactory.deploy();
-    await erc20Token._deployed();
+    await erc20Token.deployed();
 
     const twittMainFactory = await ethers.getContractFactory("ZktTwittMain");
     twittMain = await twittMainFactory.deploy(COST_PER_LIKE, erc20Token.address);
@@ -40,6 +40,8 @@ describe("Twitt Main", () => {
         const TOKEN_ID = 2;
         const tx = await erc20Token.mint(account1.address, 20);
         tx.wait();
+        const balanceTx = await erc20Token.balanceOf(account1.address);
+        expect(balanceTx).to.be.equal(20);
 
         const likeTx = await twittMain.connect(account1).like(TOKEN_ID);
         likeTx.wait();

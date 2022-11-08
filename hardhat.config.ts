@@ -2,6 +2,7 @@ import { config as LoadEnv } from "dotenv";
 require("@matterlabs/hardhat-zksync-deploy");
 require("@matterlabs/hardhat-zksync-solc");
 import "@nomicfoundation/hardhat-toolbox";
+import "hardhat-tracer";
 
 LoadEnv();
 
@@ -22,7 +23,7 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      zksync: true,
+    //  zksync: true,
     },
   },
   solidity: {
