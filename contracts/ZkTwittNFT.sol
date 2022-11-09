@@ -7,4 +7,8 @@ contract ZkTwittNFT is ERC721 {
 
     constructor() ERC721("ZkTwittNFT", "ZT") {}
 
+    function safeMint(address to, uint256 tokenId) public {
+        _safeMint(to, tokenId);
+    }
+
 }

@@ -1,62 +1,73 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "./ZkTwitt.sol";
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IZkTwittERC20 is IERC20 {
+
+    function mint(address to, uint256 amount) external;
+
+    function burnFrom(address from, uint256 amount) external;
 }
+
+
+interface IZkTwittERC721 is IERC721 {
+    function safeMint(address to, uint256 tokenId) external;
+}
+
 
 contract ZktTwittMain {
 
-    uint public costPerLike;
-    uint public costOfTwitt;
-    uint public priceOfToken;
-    mapping(uint => uint) public likesCountPerTweet;
-    mapping(uint => address[]) public likersPerTweet;
-    mapping(uint=>address) public twitOwner
-    mapping(address=>uint[]) public allTweets
-    IZkTwittERC20 public zkTwit;  
+    uint priceOfToken = 2;
+    uint costPerLike;
+    uint costPerTweet;
+    mapping(uint => uint) likesCountPerTweet;
+    mapping(uint => address[]) likersPerTweet;
+    IZkTwittERC20 zkTwitERC20;  
+    IZkTwittERC721 zkTwittERC721;
 
-    constructor (uint _costPerLike, address _zkTwittERC20,_priceOfToken) {
+
+    constructor (uint _costPerTweet, 
+                 uint _costPerLike,
+                 address _zkTwittERC20, 
+                 address _zkTwittERC721) {
+        costPerTweet = _costPerTweet;
         costPerLike = _costPerLike;
-        zkTwit = IZkTwittERC20(_zkTwittERC20);
-        priceOfToken=_priceOfToken
+        zkTwitERC20 = IZkTwittERC20(_zkTwittERC20);
+        zkTwittERC721 = IZkTwittERC721(_zkTwittERC721);
     }
 
-//payable with the costPerLike
-    function like(uint _twittId) public payable {
-        require(zkTwit.balanceOf(msg.sender) >= costPerLike, "not enough balance to pay for like");
-        //send few token to owner of twitt
-        //get owner
-        address owner=twitOwner[_twittId]
-        zkTwit.transfer(owner,costPerLike/2);
-        likesCountPerTweet[_twittId]++;
-        likersPerTweet[_twittId].push(msg.sender);
+    function tweet(uint _tokenId) public {
+        require(zkTwitERC20.balanceOf(msg.sender) >= costPerTweet, "not enough balance to pay for tweet");
+        zkTwittERC721.safeMint(msg.sender, _tokenId);
+        zkTwitERC20.burnFrom(msg.sender, costPerTweet);
+
     }
-//priceOfToken
-   function buyToken () public payable
-   {
-    uint256  paymentReceived=msg.value;
-    uint256 amountToBeGiven=paymentReceived/priceOfToken;
-    zkTwit.mint(msg.sender,amountToBeGiven);
-  }
+
+    function like(uint _tokenId) public {
+        require(zkTwitERC20.balanceOf(msg.sender) >= costPerLike, "not enough balance to pay for like");
+        address tweetOwner = zkTwittERC721.ownerOf(_tokenId);
+        likesCountPerTweet[_tokenId]++;
+        likersPerTweet[_tokenId].push(msg.sender);
+        zkTwitERC20.transferFrom(msg.sender, tweetOwner, costPerLike);
+    }
 
 
-  function searchforTwittOwner(uint twitId){
-    return  twitOwner[twitId];
-  }
+    function buyToken() public payable {
+        uint256  paymentReceived = msg.value;
+        uint256 amountToBeGiven = paymentReceived/priceOfToken;
+        zkTwitERC20.mint(msg.sender,amountToBeGiven);
+    }
 
-  function getAllTwitt(address user){
-     return allTweets[user]
-  }
 
     function nbLike(uint _twittId) public view returns (uint) {
         return likesCountPerTweet[_twittId];
     }
  
- //minting the nft
-    function tweet() payable{
-        //mint the nft
-        //and return Id
+
+    function whoLike(uint _tokenId) public view returns (address[] memory){
+        return likersPerTweet[_tokenId];
     }
 }
