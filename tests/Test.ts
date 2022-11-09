@@ -35,7 +35,7 @@ describe("Twitt Main", () => {
     await twittMain.deployed();
 
     [deployer, account1, account2] = await ethers.getSigners();
-
+   
   });
 
 
@@ -47,6 +47,17 @@ describe("Twitt Main", () => {
   async function checkBalance(address: string, expectedAmt: number){
     const balanceTx = await erc20Token.balanceOf(address);
     expect(balanceTx).to.be.equal(expectedAmt);
+  }
+
+  async function approveTx(from: SignerWithAddress, to: string, amount: number){
+    console.log(`approve tx from ${from.address} to ${to} for the amount ${amount}`);
+    const approveTx = await erc20Token.connect(from).approve(to, amount);
+    approveTx.wait();
+  }
+
+  async function tweet(account: SignerWithAddress, tokenId: number) {
+    const tweetTx = await twittMain.connect(account).tweet(tokenId);
+    tweetTx.wait();
   }
 
   describe("When a user mints ERC20 token", () => {
@@ -68,12 +79,11 @@ describe("Twitt Main", () => {
       const TOKEN_ID = 1;
       
       mintToken(account2.address, AMOUNT_TOKEN);
-      checkBalance(account2.address, AMOUNT_TOKEN);
+      approveTx(account2, twittMain.address, AMOUNT_TOKEN);
 
-      const tweetTx = await twittMain.connect(account2).tweet(TOKEN_ID);
-      tweetTx.wait();
+      await tweet(account2, TOKEN_ID);
 
-      checkBalance(account1.address, 0);
+      checkBalance(account2.address, 0);
       expect(await erc721Token.ownerOf(TOKEN_ID)).to.be.equals(account2.address);
     });
 
@@ -88,18 +98,16 @@ describe("Twitt Main", () => {
 
     it("when a user successfully likes a tweet", async () => {
         const TOKEN_ID = 2;
-        const tx = await erc20Token.mint(account1.address, 20);
-        tx.wait();
-        const balanceTx = await erc20Token.balanceOf(account1.address);
-        expect(balanceTx).to.be.equal(20);
+        mintToken(account1.address, AMOUNT_TOKEN);
+        approveTx(account1, twittMain.address, AMOUNT_TOKEN);
+        tweet(account1, TOKEN_ID);
+
 
         const likeTx = await twittMain.connect(account1).like(TOKEN_ID);
         likeTx.wait();
 
         const nbLikes = await twittMain.nbLike(TOKEN_ID);
         expect(nbLikes).to.be.equals(1);
-
-
     });
     
   });
