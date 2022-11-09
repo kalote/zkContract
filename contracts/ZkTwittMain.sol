@@ -9,7 +9,7 @@ interface IZkTwittERC20 is IERC20 {
 
     function mint(address to, uint256 amount) external;
 
-    function burnFrom(address from, uint256 amount) external;
+    function burn(uint256 amount) external;
 }
 
 
@@ -42,8 +42,7 @@ contract ZktTwittMain {
     function tweet(uint _tokenId) public {
         require(zkTwitERC20.balanceOf(msg.sender) >= costPerTweet, "not enough balance to pay for tweet");
         zkTwittERC721.safeMint(msg.sender, _tokenId);
-        zkTwitERC20.burnFrom(msg.sender, costPerTweet);
-
+        zkTwitERC20.burn(costPerTweet);
     }
 
     function like(uint _tokenId) public {

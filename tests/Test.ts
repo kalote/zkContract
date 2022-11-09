@@ -8,7 +8,7 @@ import { ZktTwittMain, ZkTwitt, ZkTwittNFT } from "../typechain-types";
 
 const AMOUNT_TOKEN = 20; 
 const COST_PER_LIKE = 1;
-const COST_PER_TWEET = 20;
+const COST_PER_TWEET = 10;
 
 
 describe("Twitt Main", () => {
@@ -68,6 +68,8 @@ describe("Twitt Main", () => {
       const TOKEN_ID = 1;
       
       mintToken(account2.address, AMOUNT_TOKEN);
+      checkBalance(account2.address, AMOUNT_TOKEN);
+
       const tweetTx = await twittMain.connect(account2).tweet(TOKEN_ID);
       tweetTx.wait();
 
