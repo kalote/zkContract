@@ -8,13 +8,13 @@ interface IZkTwittERC20 is IERC20 {
 
 contract ZktTwittMain {
 
-    uint costPerLike;
-    uint costOfTwitt;
-    uint priceOfToken;
-    mapping(uint => uint) likesCountPerTweet;
-    mapping(uint => address[]) likersPerTweet;
-    mapping(uint=>address)twitOwner
-    IZkTwittERC20 zkTwit;  
+    uint public costPerLike;
+    uint public costOfTwitt;
+    uint public priceOfToken;
+    mapping(uint => uint) public likesCountPerTweet;
+    mapping(uint => address[]) public likersPerTweet;
+    mapping(uint=>address) public twitOwner
+    IZkTwittERC20 public zkTwit;  
 
     constructor (uint _costPerLike, address _zkTwittERC20,_priceOfToken) {
         costPerLike = _costPerLike;
@@ -32,7 +32,7 @@ contract ZktTwittMain {
         likesCountPerTweet[_twittId]++;
         likersPerTweet[_twittId].push(msg.sender);
     }
-
+//priceOfToken
    function buyToken () public payable
    {
     uint256  paymentReceived=msg.value;
@@ -40,13 +40,13 @@ contract ZktTwittMain {
     zkTwit.mint(msg.sender,amountToBeGiven);
   }
 
-  function searchforTwitt(uint twitId){
-    return 
+
+  function searchforTwittOwner(uint twitId){
+    return  twitOwner[twitId];
   }
 
   function getAllTwitt(address user){
-
-    return 
+     return 
   }
 
     function nbLike(uint _twittId) public view returns (uint) {
