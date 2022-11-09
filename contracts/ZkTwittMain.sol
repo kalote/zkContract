@@ -14,6 +14,7 @@ contract ZktTwittMain {
     mapping(uint => uint) public likesCountPerTweet;
     mapping(uint => address[]) public likersPerTweet;
     mapping(uint=>address) public twitOwner
+    mapping(address=>uint[]) public allTweets
     IZkTwittERC20 public zkTwit;  
 
     constructor (uint _costPerLike, address _zkTwittERC20,_priceOfToken) {
@@ -46,7 +47,7 @@ contract ZktTwittMain {
   }
 
   function getAllTwitt(address user){
-     return 
+     return allTweets[user]
   }
 
     function nbLike(uint _twittId) public view returns (uint) {
