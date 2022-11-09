@@ -19,6 +19,7 @@ describe("Twitt Main", () => {
   let deployer: SignerWithAddress;
   let account1: SignerWithAddress;
   let account2: SignerWithAddress;
+  let account3: SignerWithAddress;
 
   beforeEach(async () => {
 
@@ -34,7 +35,7 @@ describe("Twitt Main", () => {
     twittMain = await twittMainFactory.deploy(COST_PER_TWEET, COST_PER_LIKE, erc20Token.address, erc721Token.address);
     await twittMain.deployed();
 
-    [deployer, account1, account2] = await ethers.getSigners();
+    [deployer, account1, account2, account3] = await ethers.getSigners();
    
   });
 
@@ -49,9 +50,9 @@ describe("Twitt Main", () => {
     expect(balanceTx).to.be.equal(expectedAmt);
   }
 
-  async function approveTx(from: SignerWithAddress, to: string, amount: number){
-    console.log(`approve tx from ${from.address} to ${to} for the amount ${amount}`);
-    const approveTx = await erc20Token.connect(from).approve(to, amount);
+  async function approveTx(from: SignerWithAddress, amount: number){
+    console.log(`approve tx from ${from.address} to ${twittMain.address} for the amount ${amount}`);
+    const approveTx = await erc20Token.connect(from).approve(twittMain.address, amount);
     approveTx.wait();
   }
 
@@ -70,40 +71,65 @@ describe("Twitt Main", () => {
   });
 
   describe("When a user tweets", () => {
+
     it("must have enough balance", async () => {
-      const tx = twittMain.connect(account2).tweet(1);
+      const tx = twittMain.connect(account1).tweet(1);
       await expect(tx).to.be.revertedWith("not enough balance to pay for tweet");
     });
 
     it("when a user successfully tweets", async () => {
       const TOKEN_ID = 1;
       
-      mintToken(account2.address, AMOUNT_TOKEN);
-      approveTx(account2, twittMain.address, AMOUNT_TOKEN);
+      mintToken(account1.address, AMOUNT_TOKEN);
+      approveTx(account1, AMOUNT_TOKEN);
 
-      await tweet(account2, TOKEN_ID);
+      await tweet(account1, TOKEN_ID);
 
-      checkBalance(account2.address, 0);
-      expect(await erc721Token.ownerOf(TOKEN_ID)).to.be.equals(account2.address);
+      checkBalance(account1.address, 0);
+      expect(await erc721Token.ownerOf(TOKEN_ID)).to.be.equals(account1.address);
     });
 
   });
 
 
   describe("When a user likes a tweet", () => {
+
     it("must have enough balance", async () => {
-      const tx = twittMain.like(1);
+      const tx = twittMain.connect(account2).like(1);
       expect(tx).to.be.revertedWith("not enough balance to pay for like");
     });
 
     it("when a user successfully likes a tweet", async () => {
         const TOKEN_ID = 2;
-        mintToken(account1.address, AMOUNT_TOKEN);
-        approveTx(account1, twittMain.address, AMOUNT_TOKEN);
-        tweet(account1, TOKEN_ID);
+        mintToken(account2.address, AMOUNT_TOKEN);
+        approveTx(account2, AMOUNT_TOKEN);
+        await tweet(account2, TOKEN_ID);
+
+        const likeTx = await twittMain.connect(account2).like(TOKEN_ID);
+        likeTx.wait();
+
+        const nbLikes = await twittMain.nbLike(TOKEN_ID);
+        expect(nbLikes).to.be.equals(1);
+    });
+    
+  });
 
 
-        const likeTx = await twittMain.connect(account1).like(TOKEN_ID);
+  describe("When a user retweets a tweet", () => {
+
+    it("must have enough balance", async () => {
+      const tx = twittMain.connect(account3).retweet(1);
+      expect(tx).to.be.revertedWith("not enough balance to pay for retweet");
+    });
+
+    it("when a user successfully retweets", async () => {
+        const TOKEN_ID = 3;
+        mintToken(account3.address, AMOUNT_TOKEN);
+        approveTx(account3, AMOUNT_TOKEN);
+        await tweet(account3, TOKEN_ID);
+
+
+        const likeTx = await twittMain.connect(account3).like(TOKEN_ID);
         likeTx.wait();
 
         const nbLikes = await twittMain.nbLike(TOKEN_ID);

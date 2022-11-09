@@ -23,8 +23,10 @@ contract ZktTwittMain {
 
     uint priceOfToken = 2;
     uint costPerLike;
+    uint costPerRetweet;
     uint costPerTweet;
     mapping(uint => uint) likesCountPerTweet;
+    mapping(uint => uint) retweetCountPerTweet;
     mapping(uint => address[]) likersPerTweet;
     IZkTwittERC20 zkTwitERC20;  
     IZkTwittERC721 zkTwittERC721;
@@ -36,6 +38,7 @@ contract ZktTwittMain {
                  address _zkTwittERC721) {
         costPerTweet = _costPerTweet;
         costPerLike = _costPerLike;
+        costPerRetweet = _costPerLike;
         zkTwitERC20 = IZkTwittERC20(_zkTwittERC20);
         zkTwittERC721 = IZkTwittERC721(_zkTwittERC721);
     }
@@ -54,6 +57,13 @@ contract ZktTwittMain {
         zkTwitERC20.transferFrom(msg.sender, tweetOwner, costPerLike);
     }
 
+    function retweet(uint _tokenId) public {
+        require(zkTwitERC20.balanceOf(msg.sender) >= costPerRetweet, "not enough balance to pay for retweet");
+        address tweetOwner = zkTwittERC721.ownerOf(_tokenId);
+        retweetCountPerTweet[_tokenId]++;
+        zkTwitERC20.transferFrom(msg.sender, tweetOwner, costPerRetweet);
+    }
+
 
     function buyToken() public payable {
         uint256  paymentReceived = msg.value;
@@ -64,6 +74,10 @@ contract ZktTwittMain {
 
     function nbLike(uint _twittId) public view returns (uint) {
         return likesCountPerTweet[_twittId];
+    }
+
+     function nbRetweet(uint _twittId) public view returns (uint) {
+        return retweetCountPerTweet[_twittId];
     }
  
 
