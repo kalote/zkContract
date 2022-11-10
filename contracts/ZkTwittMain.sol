@@ -32,9 +32,9 @@ contract ZkTwittMain {
         address _zkTwittERC20,
         address _zkTwittERC721
     ) {
-        costPerTweet = _costPerTweet;
-        costPerLike = _costPerLike;
-        costPerRetweet = _costPerLike;
+        costPerTweet = _costPerTweet * 10**18;
+        costPerLike = _costPerLike * 10**18;
+        costPerRetweet = _costPerLike * 10**18;
         zkTwitERC20 = IZkTwittERC20(_zkTwittERC20);
         zkTwittERC721 = IZkTwittERC721(_zkTwittERC721);
     }
