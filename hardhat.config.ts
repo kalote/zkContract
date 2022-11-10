@@ -9,7 +9,7 @@ const config = {
   paths: { tests: "tests" },
   networks: {
     matic: {
-      url: "https://rpc-mumbai.maticvigil.com/v1/babe1cd8da1549003a6e3a0d6048133c9d4a9080",
+      url: `https://rpc-mumbai.maticvigil.com/v1/${process.env.MATIC_KEY}`,
       accounts: [process.env.PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 8000000000,
